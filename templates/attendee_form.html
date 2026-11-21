@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit attendee' if mode == 'edit' else 'Add attendee' }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ 'Edit attendee' if mode == 'edit' else 'Add attendee' }}</h1>
+</div>
+
+<form class="card form narrow" method="post"
+      action="{{ url_for('attendee_edit', attendee_id=attendee.id) if mode == 'edit' else url_for('attendee_new') }}">
+  <label>Name <input type="text" name="name" value="{{ attendee.name }}" required></label>
+  <label>Email <input type="email" name="email" value="{{ attendee.email }}" required></label>
+  <label>Phone (optional) <input type="tel" name="phone" value="{{ attendee.phone }}"></label>
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">{{ 'Save changes' if mode == 'edit' else 'Add attendee' }}</button>
+    <a class="btn" href="{{ url_for('attendee_detail', attendee_id=attendee.id) if mode == 'edit' else url_for('attendees_list') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

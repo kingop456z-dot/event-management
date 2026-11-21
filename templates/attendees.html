@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Attendees{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Attendees</h1>
+  <a class="btn btn-primary" href="{{ url_for('attendee_new') }}">+ Add attendee</a>
+</div>
+
+<form class="filters card" method="get" action="{{ url_for('attendees_list') }}">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search by name or email">
+  <button class="btn" type="submit">Search</button>
+</form>
+
+<section class="card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Events</th></tr></thead>
+      <tbody>
+        {% for a in attendees %}
+        <tr>
+          <td><a class="row-title" href="{{ url_for('attendee_detail', attendee_id=a.id) }}">{{ a.name }}</a></td>
+          <td>{{ a.email }}</td>
+          <td>{{ a.phone or '—' }}</td>
+          <td>{{ a.events_count }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="empty">No attendees found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

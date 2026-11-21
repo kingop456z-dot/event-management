@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Not found{% endblock %}
+{% block content %}
+<div class="card empty-state">
+  <h1>Page not found</h1>
+  <p class="muted">That event, attendee or page doesn't exist (it may have been deleted).</p>
+  <a class="btn btn-primary" href="{{ url_for('dashboard') }}">Back to dashboard</a>
+</div>
+{% endblock %}

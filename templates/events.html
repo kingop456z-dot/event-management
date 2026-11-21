@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Events{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Events</h1>
+  <a class="btn btn-primary" href="{{ url_for('event_new') }}">+ New event</a>
+</div>
+
+<form class="filters card" method="get" action="{{ url_for('events_list') }}">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search title, place or description">
+  <select name="category">
+    <option value="">All categories</option>
+    {% for c in categories %}
+      <option value="{{ c }}" {{ 'selected' if c == category }}>{{ c }}</option>
+    {% endfor %}
+  </select>
+  <select name="when">
+    <option value="upcoming" {{ 'selected' if when == 'upcoming' }}>Upcoming</option>
+    <option value="past" {{ 'selected' if when == 'past' }}>Past</option>
+    <option value="all" {{ 'selected' if when == 'all' }}>All dates</option>
+  </select>
+  <button class="btn" type="submit">Filter</button>
+</form>
+
+<section class="card">
+  {% include "_events_table.html" %}
+</section>
+{% endblock %}

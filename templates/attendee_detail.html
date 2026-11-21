@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ attendee.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ attendee.name }}</h1>
+    <span class="muted">{{ attendee.email }}{% if attendee.phone %} · {{ attendee.phone }}{% endif %}</span>
+  </div>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('attendee_edit', attendee_id=attendee.id) }}">Edit</a>
+    <form method="post" action="{{ url_for('attendee_delete', attendee_id=attendee.id) }}"
+          onsubmit="return confirm('Delete this attendee and all of their registrations?');">
+      <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <div class="card-head"><h2>Registrations ({{ registrations|length }})</h2></div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Event</th><th>When</th><th></th></tr></thead>
+        <tbody>
+          {% for r in registrations %}
+          <tr>
+            <td><a href="{{ url_for('event_detail', event_id=r.event_id) }}">{{ r.title }}</a><br><small class="muted">{{ r.location }}</small></td>
+            <td>{{ r.event_date|fmt_date }}<br><small class="muted">{{ r.event_time|fmt_time }}</small></td>
+            <td class="right">
+              <form method="post" action="{{ url_for('registration_cancel', reg_id=r.reg_id) }}"
+                    onsubmit="return confirm('Cancel this registration?');">
+                <input type="hidden" name="next" value="{{ url_for('attendee_detail', attendee_id=attendee.id) }}">
+                <button class="btn btn-small" type="submit">Cancel</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="empty">Not registered for any events.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Register for an event</h2>
+    {% if open_events %}
+      <form class="form" method="post" action="{{ url_for('attendee_register', attendee_id=attendee.id) }}">
+        <label>Upcoming event
+          <select name="event_id" required>
+            {% for e in open_events %}
+              <option value="{{ e.id }}">{{ e.title }} — {{ e.event_date|fmt_date }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button class="btn btn-primary" type="submit">Register</button>
+      </form>
+    {% else %}
+      <p class="muted">No other upcoming events to join.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

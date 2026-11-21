@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit event' if mode == 'edit' else 'New event' }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ 'Edit event' if mode == 'edit' else 'New event' }}</h1>
+</div>
+
+<form class="card form" method="post"
+      action="{{ url_for('event_edit', event_id=event.id) if mode == 'edit' else url_for('event_new') }}">
+  <label>Title
+    <input type="text" name="title" value="{{ event.title }}" required maxlength="120">
+  </label>
+
+  <label>Description
+    <textarea name="description" rows="4">{{ event.description }}</textarea>
+  </label>
+
+  <div class="row">
+    <label>Category
+      <select name="category">
+        {% for c in categories %}
+          <option value="{{ c }}" {{ 'selected' if c == event.category }}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Location
+      <input type="text" name="location" value="{{ event.location }}" required maxlength="160">
+    </label>
+  </div>
+
+  <div class="row">
+    <label>Date
+      <input type="date" name="event_date" value="{{ event.event_date }}" required>
+    </label>
+    <label>Start time
+      <input type="time" name="event_time" value="{{ event.event_time }}" required>
+    </label>
+  </div>
+
+  <div class="row">
+    <label>Capacity
+      <input type="number" name="capacity" value="{{ event.capacity }}" min="1" required>
+    </label>
+    <label>Ticket price (0 for free)
+      <input type="number" name="price" value="{{ event.price }}" min="0" step="0.01">
+    </label>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">{{ 'Save changes' if mode == 'edit' else 'Create event' }}</button>
+    <a class="btn" href="{{ url_for('event_detail', event_id=event.id) if mode == 'edit' else url_for('events_list') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

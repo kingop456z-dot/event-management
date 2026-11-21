@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ event.title }}</h1>
+    <span class="tag">{{ event.category }}</span>
+  </div>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('event_edit', event_id=event.id) }}">Edit</a>
+    <form method="post" action="{{ url_for('event_delete', event_id=event.id) }}"
+          onsubmit="return confirm('Delete this event and all of its registrations?');">
+      <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <dl class="details">
+      <dt>Date</dt><dd>{{ event.event_date|fmt_date }}</dd>
+      <dt>Time</dt><dd>{{ event.event_time|fmt_time }}</dd>
+      <dt>Location</dt><dd>{{ event.location }}</dd>
+      <dt>Price</dt><dd>{{ event.price|money }}</dd>
+      <dt>Seats</dt>
+      <dd>
+        {{ event.registered }} / {{ event.capacity }} taken
+        <progress max="{{ event.capacity }}" value="{{ event.registered }}"></progress>
+      </dd>
+    </dl>
+    {% if event.description %}
+      <p class="description">{{ event.description }}</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Register an attendee</h2>
+    {% if event.event_date < today %}
+      <p class="muted">This event has already taken place, so registration is closed.</p>
+    {% elif event.registered >= event.capacity %}
+      <p class="muted">This event is full.</p>
+    {% else %}
+      <form class="form" method="post" action="{{ url_for('event_register', event_id=event.id) }}">
+        <label>Name <input type="text" name="name" required></label>
+        <label>Email <input type="email" name="email" required></label>
+        <label>Phone (optional) <input type="tel" name="phone"></label>
+        <button class="btn btn-primary" type="submit">Register</button>
+      </form>
+    {% endif %}
+  </section>
+</div>
+
+<section class="card">
+  <div class="card-head"><h2>Attendees ({{ attendees|length }})</h2></div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Registered</th><th></th></tr></thead>
+      <tbody>
+        {% for a in attendees %}
+        <tr>
+          <td><a href="{{ url_for('attendee_detail', attendee_id=a.id) }}">{{ a.name }}</a></td>
+          <td>{{ a.email }}</td>
+          <td>{{ a.phone or '—' }}</td>
+          <td><small class="muted">{{ a.registered_at }}</small></td>
+          <td class="right">
+            <form method="post" action="{{ url_for('registration_cancel', reg_id=a.reg_id) }}"
+                  onsubmit="return confirm('Cancel this registration?');">
+              <input type="hidden" name="next" value="{{ url_for('event_detail', event_id=event.id) }}">
+              <button class="btn btn-small" type="submit">Cancel</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="empty">Nobody has registered yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

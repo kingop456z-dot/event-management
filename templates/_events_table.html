@@ -1,0 +1,33 @@
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr><th>Event</th><th>When</th><th>Where</th><th>Price</th><th>Seats</th></tr>
+    </thead>
+    <tbody>
+      {% for e in events %}
+      <tr>
+        <td>
+          <a class="row-title" href="{{ url_for('event_detail', event_id=e.id) }}">{{ e.title }}</a>
+          <span class="tag">{{ e.category }}</span>
+        </td>
+        <td>{{ e.event_date|fmt_date }}<br><small class="muted">{{ e.event_time|fmt_time }}</small></td>
+        <td>{{ e.location }}</td>
+        <td>{{ e.price|money }}</td>
+        <td>
+          {% if e.event_date < today %}
+            <span class="badge badge-muted">Past</span>
+          {% elif e.registered >= e.capacity %}
+            <span class="badge badge-red">Full</span>
+          {% else %}
+            <span class="badge badge-green">{{ e.capacity - e.registered }} left</span>
+          {% endif %}
+          <progress max="{{ e.capacity }}" value="{{ e.registered }}"></progress>
+          <small class="muted">{{ e.registered }} / {{ e.capacity }}</small>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="empty">No events found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
