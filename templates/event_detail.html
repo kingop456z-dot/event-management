@@ -7,6 +7,7 @@
     <span class="tag">{{ event.category }}</span>
   </div>
   <div class="actions">
+    <a class="btn" href="{{ url_for('email_page', event_id=event.id) }}">Email attendees</a>
     <a class="btn" href="{{ url_for('event_edit', event_id=event.id) }}">Edit</a>
     <form method="post" action="{{ url_for('event_delete', event_id=event.id) }}"
           onsubmit="return confirm('Delete this event and all of its registrations?');">

@@ -2,7 +2,10 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <div class="page-head">
-  <h1>Dashboard</h1>
+  <div>
+    <h1>Dashboard</h1>
+    <p class="muted">Your events at a glance.</p>
+  </div>
   <a class="btn btn-primary" href="{{ url_for('event_new') }}">+ New event</a>
 </div>
 
@@ -13,26 +16,25 @@
   <div class="stat"><span class="stat-num">{{ stats.registrations }}</span><span class="stat-label">Registrations</span></div>
 </section>
 
-<div class="grid-2">
-  <section class="card">
-    <div class="card-head"><h2>Next up</h2><a href="{{ url_for('events_list') }}">View all</a></div>
-    {% set events = upcoming %}
-    {% include "_events_table.html" %}
-  </section>
-
-  <section class="card">
-    <div class="card-head"><h2>Recent registrations</h2></div>
-    <ul class="feed">
-      {% for r in recent %}
-      <li>
-        <a href="{{ url_for('attendee_detail', attendee_id=r.attendee_id) }}">{{ r.name }}</a>
-        joined <a href="{{ url_for('event_detail', event_id=r.event_id) }}">{{ r.title }}</a>
-        <small class="muted">{{ r.registered_at }}</small>
-      </li>
-      {% else %}
-      <li class="empty">No registrations yet.</li>
-      {% endfor %}
-    </ul>
-  </section>
+<div class="section-title">
+  <h2>Next up</h2>
+  <a href="{{ url_for('events_list') }}">View all</a>
 </div>
+{% set events = upcoming %}
+{% include "_event_cards.html" %}
+
+<section class="card" style="margin-top: 1.5rem;">
+  <div class="card-head"><h2>Recent registrations</h2></div>
+  <ul class="feed">
+    {% for r in recent %}
+    <li>
+      <a href="{{ url_for('attendee_detail', attendee_id=r.attendee_id) }}">{{ r.name }}</a>
+      joined <a href="{{ url_for('event_detail', event_id=r.event_id) }}">{{ r.title }}</a>
+      <small class="muted">{{ r.registered_at }}</small>
+    </li>
+    {% else %}
+    <li class="empty">No registrations yet.</li>
+    {% endfor %}
+  </ul>
+</section>
 {% endblock %}

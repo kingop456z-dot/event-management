@@ -4,6 +4,8 @@ A small event management website built with **Python (Flask)**, **HTML/CSS (Jinj
 
 ## Features
 
+- **Sidebar navigation** – Dashboard, Events, Attendees, Email. Collapsible to icons on desktop (remembered between visits); becomes a hamburger-menu drawer on mobile
+- **Email** – pick everyone or one event's attendees, write a message, and open it in your email app (BCC filled in) or copy the addresses. It uses `mailto:`, so no mail server is needed; sending directly from the site would need SMTP or an email service
 - **Dashboard** – upcoming events, totals, latest registrations
 - **Events** – create, view, edit, delete; search by text, filter by category and upcoming/past
 - **Attendees** – add, edit, delete, search; see every event a person has joined

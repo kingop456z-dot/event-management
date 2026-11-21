@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Email{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Email</h1>
+    <p class="muted">Write to everyone, or just the people registered for one event.</p>
+  </div>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <div class="form">
+      <label>Send to
+        <select id="audience">
+          <option value="all" {{ 'selected' if selected == 'all' }}>Everyone ({{ everyone_count }})</option>
+          {% for e in events %}
+            <option value="{{ e.id }}" {{ 'selected' if selected == e.id|string }}>
+              {{ e.title }} · {{ e.event_date|fmt_date }} ({{ e.registered }})
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Subject
+        <input type="text" id="subject" placeholder="e.g. Reminder: see you on Saturday">
+      </label>
+      <label>Message
+        <textarea id="body" rows="9" placeholder="Write your message here…"></textarea>
+      </label>
+      <div class="actions">
+        <a class="btn btn-primary" id="mailBtn" href="#">Open in email app</a>
+        <button class="btn" id="copyBtn" type="button">Copy addresses</button>
+      </div>
+      <p class="hint muted" id="hint" role="status"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 id="recipientsTitle">Recipients</h2></div>
+    <ul class="recipients" id="recipients"></ul>
+  </section>
+</div>
+
+<script id="audience-data" type="application/json">{{ audience|tojson }}</script>
+<script>
+(function () {
+  var audience = JSON.parse(document.getElementById('audience-data').textContent);
+  var select = document.getElementById('audience');
+  var subject = document.getElementById('subject');
+  var body = document.getElementById('body');
+  var mailBtn = document.getElementById('mailBtn');
+  var copyBtn = document.getElementById('copyBtn');
+  var list = document.getElementById('recipients');
+  var title = document.getElementById('recipientsTitle');
+  var hint = document.getElementById('hint');
+  var subjectTouched = false;
+
+  function people() { return audience[select.value].people; }
+  function emails() { return people().map(function (p) { return p.email; }); }
+
+  function render() {
+    var ppl = people();
+    title.textContent = 'Recipients (' + ppl.length + ')';
+    list.textContent = '';
+    if (!ppl.length) {
+      var li = document.createElement('li');
+      li.className = 'muted';
+      li.textContent = 'Nobody is registered for this event yet.';
+      list.appendChild(li);
+    }
+    ppl.forEach(function (p) {
+      var li = document.createElement('li');
+      var n = document.createElement('span'); n.textContent = p.name;
+      var m = document.createElement('small'); m.className = 'muted'; m.textContent = p.email;
+      li.appendChild(n); li.appendChild(m);
+      list.appendChild(li);
+    });
+    if (!subjectTouched && select.value !== 'all') {
+      subject.value = 'Update: ' + audience[select.value].label;
+    } else if (!subjectTouched) {
+      subject.value = '';
+    }
+    update();
+  }
+
+  function mailtoUrl() {
+    return 'mailto:?bcc=' + encodeURIComponent(emails().join(',')) +
+           '&subject=' + encodeURIComponent(subject.value) +
+           '&body=' + encodeURIComponent(body.value);
+  }
+
+  function update() {
+    var has = emails().length > 0;
+    mailBtn.classList.toggle('is-disabled', !has);
+    copyBtn.disabled = !has;
+    mailBtn.href = has ? mailtoUrl() : '#';
+    hint.textContent = (has && mailtoUrl().length > 1800)
+      ? 'Long recipient list: if your email app does not open, use "Copy addresses" and paste them into BCC.'
+      : '';
+  }
+
+  copyBtn.addEventListener('click', function () {
+    var text = emails().join(', ');
+    function done() { hint.textContent = 'Copied ' + emails().length + ' address(es) to the clipboard.'; }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, function () { fallback(text, done); });
+    } else { fallback(text, done); }
+  });
+  function fallback(text, done) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { hint.textContent = 'Could not copy automatically.'; }
+    document.body.removeChild(ta);
+  }
+
+  select.addEventListener('change', render);
+  subject.addEventListener('input', function () { subjectTouched = true; update(); });
+  body.addEventListener('input', update);
+  render();
+})();
+</script>
+{% endblock %}

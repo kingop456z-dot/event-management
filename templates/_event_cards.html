@@ -1,0 +1,30 @@
+<div class="event-grid">
+  {% for e in events %}
+  {% set is_past = e.event_date < today %}
+  <a class="event-card {{ 'is-past' if is_past }}" href="{{ url_for('event_detail', event_id=e.id) }}">
+    <div class="ec-cover cat-{{ e.category|lower }}">
+      <span class="ec-cat">{{ e.category }}</span>
+      <span class="ec-date"><b>{{ e.event_date[8:10] }}</b>{{ e.event_date|month_abbr }}</span>
+    </div>
+    <div class="ec-body">
+      <h3>{{ e.title }}</h3>
+      <p class="ec-meta">{{ e.event_date|fmt_date }} · {{ e.event_time|fmt_time }}</p>
+      <p class="ec-meta">{{ e.location }}</p>
+      <div class="ec-foot">
+        <span class="price">{{ e.price|money }}</span>
+        {% if is_past %}
+          <span class="badge badge-muted">Past</span>
+        {% elif e.registered >= e.capacity %}
+          <span class="badge badge-red">Full</span>
+        {% else %}
+          <span class="badge badge-green">{{ e.capacity - e.registered }} left</span>
+        {% endif %}
+      </div>
+      <progress max="{{ e.capacity }}" value="{{ e.registered }}"></progress>
+      <small class="muted">{{ e.registered }} / {{ e.capacity }} registered</small>
+    </div>
+  </a>
+  {% else %}
+  <div class="card empty" style="grid-column: 1 / -1;">No events found.</div>
+  {% endfor %}
+</div>

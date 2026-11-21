@@ -111,6 +111,14 @@ def fmt_time(value):
         return value
 
 
+@app.template_filter("month_abbr")
+def month_abbr(value):
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").strftime("%b")
+    except (TypeError, ValueError):
+        return ""
+
+
 @app.template_filter("money")
 def money(value):
     return "Free" if not value else f"{CURRENCY}{float(value):,.2f}"
@@ -434,6 +442,36 @@ def attendee_register(attendee_id):
     ok, msg = add_registration(get_db(), event, attendee_id)
     flash(msg, "success" if ok else "error")
     return redirect(url_for("attendee_detail", attendee_id=attendee_id))
+
+
+# --------------------------------------------------------------------------
+# Email (compose a message to an event's attendees)
+# --------------------------------------------------------------------------
+@app.route("/email")
+def email_page():
+    """Pick an audience (everyone, or one event's attendees) and write a message.
+    The message is opened in the visitor's own email app via a mailto: link, so
+    no mail server is needed."""
+    db = get_db()
+    events = db.execute(EVENT_SELECT + " GROUP BY e.id ORDER BY e.event_date DESC, e.event_time DESC").fetchall()
+    everyone = db.execute("SELECT name, email FROM attendees ORDER BY name COLLATE NOCASE").fetchall()
+    rows = db.execute(
+        """SELECT r.event_id, a.name, a.email
+           FROM registrations r JOIN attendees a ON a.id = r.attendee_id
+           ORDER BY a.name COLLATE NOCASE"""
+    ).fetchall()
+
+    audience = {"all": {"label": "Everyone", "people": [dict(name=p["name"], email=p["email"]) for p in everyone]}}
+    for e in events:
+        audience[str(e["id"])] = {"label": e["title"], "people": []}
+    for r in rows:
+        audience[str(r["event_id"])]["people"].append({"name": r["name"], "email": r["email"]})
+
+    selected = request.args.get("event_id", "all")
+    if selected not in audience:
+        selected = "all"
+    return render_template("email.html", events=events, audience=audience, selected=selected,
+                           everyone_count=len(everyone))
 
 
 @app.errorhandler(404)
