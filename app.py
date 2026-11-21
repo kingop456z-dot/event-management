@@ -443,5 +443,12 @@ def not_found(_e):
 
 init_db()
 
+# Demo hosting: free hosts wipe the database file on restart, so optionally
+# refill it with sample data whenever it is empty.
+if os.environ.get("AUTO_SEED") == "1":
+    from seed import seed_if_empty
+
+    seed_if_empty()
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=os.environ.get("FLASK_DEBUG") == "1")

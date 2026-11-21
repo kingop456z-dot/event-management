@@ -1,0 +1,16 @@
+# Render Blueprint: deploys the site as a free web service.
+# NOTE: Free services have an ephemeral filesystem, so the SQLite file is wiped
+# on every restart/redeploy/spin-down. AUTO_SEED=1 refills it with sample data.
+# For data that must persist, upgrade the plan and attach a disk (see README).
+services:
+  - type: web
+    name: event-management
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: AUTO_SEED
+        value: "1"
